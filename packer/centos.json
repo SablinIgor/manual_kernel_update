@@ -1,8 +1,10 @@
 {
   "variables": {
     "artifact_description": "CentOS 7.7 with kernel 5.x",
-    "artifact_version": "7.7.1908",
-    "image_name": "centos-7.7"
+    "artifact_version": "7.7.1613.02",
+    "image_name": "centos-7.7",
+    "headless": "true",
+    "ssh_timeout": "10800s"
   },
 
   "builders": [
@@ -10,13 +12,14 @@
       "name": "{{user `image_name`}}",
       "type": "virtualbox-iso",
       "vm_name": "packer-centos-vm",
+      "headless": "{{user `headless`}}",
 
       "boot_wait": "10s",
-      "disk_size": "10240",
+      "disk_size": "20240",
       "guest_os_type": "RedHat_64",
       "http_directory": "http",
 
-      "iso_url": "http://mirror.yandex.ru/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso",
+      "iso_url": "https://mirror.cuegee.com/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso",
       "iso_checksum": "9a2c47d97b9975452f7d582264e9fc16d108ed8252ac6816239a3b58cef5c53d",
       "iso_checksum_type": "sha256",
 
@@ -33,11 +36,13 @@
       "ssh_port": 22,
       "ssh_pty": true,
 
+      "ssh_wait_timeout": "{{user `ssh_timeout`}}",
+
       "output_directory": "builds",
 
       "vboxmanage": [
-        [  "modifyvm",  "{{.Name}}",  "--memory",  "1024" ],
-        [  "modifyvm",  "{{.Name}}",  "--cpus",  "2" ]
+        [  "modifyvm",  "{{.Name}}",  "--memory",  "16136" ],
+        [  "modifyvm",  "{{.Name}}",  "--cpus",  "7" ]
       ],
 
       "export_opts":
@@ -69,7 +74,8 @@
         "{{user `image_name`}}" : {
           "scripts" :
             [
-              "scripts/stage-1-kernel-update.sh",
+              "scripts/stage-1-kernel-compile-and-update.sh",
+              "scripts/stage-1a-virtualbox.sh",
               "scripts/stage-2-clean.sh"
             ]
         }
